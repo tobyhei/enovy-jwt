@@ -1,0 +1,72 @@
+static_resources:
+  listeners:
+  - name: main
+    address:
+      socket_address:
+        address: 0.0.0.0
+        port_value: 80
+    filter_chains:
+    - filters:
+      - name: envoy.http_connection_manager
+        config:
+          stat_prefix: ingress_http
+          codec_type: auto
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: local_service
+              domains:
+              - "*"
+              routes:
+              - match:
+                  prefix: "/"
+                route: 
+                  cluster: web_service
+          http_filters:
+          - name: envoy.filters.http.jwt_authn
+            config:
+              providers:
+                provider1:
+                  forward: true
+                  issuer: consumer-api
+                  audiences:
+                  - provider-api
+                  remote_jwks:
+                    http_uri:
+                      uri: https://examplecdn.com/s2sauth/jwks.dev.json              
+                provider2:
+                  forward: true
+                  issuer: second-consumer-api
+                  audiences:
+                  - provider-api
+                  remote_jwks:
+                    http_uri:
+                      uri: https://examplecdn.com/s2sauth/jwks.dev.json
+              rules:
+                - match:
+                    regex: "/health"
+                - match:
+                    prefix: "/"
+                  requires:
+                    requires_any:
+                      requirements:
+                        - provider_name: "provider1"
+                        - provider_name: "provider2"
+          - name: envoy.router
+            config: {}
+
+  clusters:
+  - name: web_service
+    connect_timeout: 0.25s
+    type: strict_dns # static
+    lb_policy: round_robin
+    hosts:
+    - socket_address:
+        address: web_service
+        port_value: 80
+admin:
+  access_log_path: "/dev/null"
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 8002
