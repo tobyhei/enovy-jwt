@@ -28,20 +28,20 @@ static_resources:
               providers:
                 provider1:
                   forward: true
-                  issuer: consumer-api
+                  issuer: ad-posting-api
                   audiences:
-                  - provider-api
+                  - test
                   remote_jwks:
                     http_uri:
-                      uri: https://examplecdn.com/s2sauth/jwks.dev.json              
+                      uri: https://wlfq2efx3d.execute-api.ap-southeast-2.amazonaws.com/dev/proxy/dev           
                 provider2:
                   forward: true
-                  issuer: second-consumer-api
+                  issuer: role-insights
                   audiences:
                   - provider-api
                   remote_jwks:
                     http_uri:
-                      uri: https://examplecdn.com/s2sauth/jwks.dev.json
+                      uri: https://wlfq2efx3d.execute-api.ap-southeast-2.amazonaws.com/dev/proxy/dev
               rules:
                 - match:
                     regex: "/health"
