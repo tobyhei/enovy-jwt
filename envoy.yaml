@@ -28,30 +28,20 @@ static_resources:
               providers:
                 provider1:
                   forward: true
-                  issuer: consumer-api
+                  issuer: https://example.com
                   audiences:
-                  - provider-api
+                  - example_service
                   remote_jwks:
                     http_uri:
-                      uri: https://examplecdn.com/s2sauth/jwks.dev.json              
-                provider2:
-                  forward: true
-                  issuer: second-consumer-api
-                  audiences:
-                  - provider-api
-                  remote_jwks:
-                    http_uri:
-                      uri: https://examplecdn.com/s2sauth/jwks.dev.json
+                      uri: https://example.com/jwks.json
+                      cluster: example_jwks_cluster
               rules:
                 - match:
                     regex: "/health"
                 - match:
                     prefix: "/"
-                  requires:
-                    requires_any:
-                      requirements:
-                        - provider_name: "provider1"
-                        - provider_name: "provider2"
+                  requires: 
+                    provider_name: "provider1"
           - name: envoy.router
             config: {}
 
@@ -69,4 +59,4 @@ admin:
   address:
     socket_address:
       address: 0.0.0.0
-      port_value: 8002
+      port_value: 8001
